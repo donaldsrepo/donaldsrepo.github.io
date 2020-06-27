@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" />
+
+<title>GoogleColabCondaCreateEnv</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="https://donaldstierman.github.io/css/JupyterNotebook.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration --></head>  
+<body>
+  <div tabindex="-1" id="notebook" class="border-box-sizing">
+    <div class="container" id="notebook-container">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>I am able to get a conda environment setup and running from within Google Colab. However, this environment seems to be transient in nature. It does not show up in any new notebook I create, and I am not able to run the notebook normally. I have to run all my python code in one cell... But at least I know using conda to create my own environment in Google Colab is possible.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Check to see if conda is already installed</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>which conda
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>/usr/local/bin/conda
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Nope, not installed. Go ahead and install it</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># try to run the bare minimum to get a new conda env working</span>
+<span class="n">conda_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">conda_path</span> <span class="o">=</span> <span class="o">!</span>which conda
+<span class="k">finally</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conda_path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;installing miniconda&#39;</span><span class="p">)</span>
+    <span class="o">!</span>wget https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh <span class="o">&amp;&amp;</span> bash Miniconda3-4.5.4-Linux-x86_64.sh -bfp /usr/local
+    <span class="o">!</span>conda update conda -y -q
+    <span class="o">!</span><span class="nb">source</span> /usr/local/etc/profile.d/conda.sh
+    <span class="o">!</span>conda init 
+    <span class="o">!</span>conda install -n root _license -y -q
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;found miniconda&#39;</span><span class="p">)</span>
+
+<span class="n">conda_envs</span> <span class="o">=</span> <span class="o">!</span>conda env list
+<span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">conda_envs</span> <span class="k">if</span> <span class="s1">&#39;test36&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">]</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;not found test36 env&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+    <span class="o">!</span>conda create -y -q --name test36 <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;found test36 env&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+installing miniconda
+--2020-06-27 22:45:59--  https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh
+Resolving repo.continuum.io (repo.continuum.io)... 104.18.201.79, 104.18.200.79, 2606:4700::6812:c94f, ...
+Connecting to repo.continuum.io (repo.continuum.io)|104.18.201.79|:443... connected.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh [following]
+--2020-06-27 22:45:59--  https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh
+Resolving repo.anaconda.com (repo.anaconda.com)... 104.16.131.3, 104.16.130.3, 2606:4700::6810:8203, ...
+Connecting to repo.anaconda.com (repo.anaconda.com)|104.16.131.3|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 58468498 (56M) [application/x-sh]
+Saving to: ‘Miniconda3-4.5.4-Linux-x86_64.sh.1’
+
+Miniconda3-4.5.4-Li 100%[===================&gt;]  55.76M   180MB/s    in 0.3s    
+
+2020-06-27 22:45:59 (180 MB/s) - ‘Miniconda3-4.5.4-Linux-x86_64.sh.1’ saved [58468498/58468498]
+
+PREFIX=/usr/local
+installing: python-3.6.5-hc3d631a_2 ...
+Python 3.6.5 :: Anaconda, Inc.
+installing: ca-certificates-2018.03.07-0 ...
+installing: conda-env-2.6.0-h36134e3_1 ...
+installing: libgcc-ng-7.2.0-hdf63c60_3 ...
+installing: libstdcxx-ng-7.2.0-hdf63c60_3 ...
+installing: libffi-3.2.1-hd88cf55_4 ...
+installing: ncurses-6.1-hf484d3e_0 ...
+installing: openssl-1.0.2o-h20670df_0 ...
+installing: tk-8.6.7-hc745277_3 ...
+installing: xz-5.2.4-h14c3975_4 ...
+installing: yaml-0.1.7-had09818_2 ...
+installing: zlib-1.2.11-ha838bed_2 ...
+installing: libedit-3.1.20170329-h6b74fdf_2 ...
+installing: readline-7.0-ha6073c6_4 ...
+installing: sqlite-3.23.1-he433501_0 ...
+installing: asn1crypto-0.24.0-py36_0 ...
+installing: certifi-2018.4.16-py36_0 ...
+installing: chardet-3.0.4-py36h0f667ec_1 ...
+installing: idna-2.6-py36h82fb2a8_1 ...
+installing: pycosat-0.6.3-py36h0a5515d_0 ...
+installing: pycparser-2.18-py36hf9f622e_1 ...
+installing: pysocks-1.6.8-py36_0 ...
+installing: ruamel_yaml-0.15.37-py36h14c3975_2 ...
+installing: six-1.11.0-py36h372c433_1 ...
+installing: cffi-1.11.5-py36h9745a5d_0 ...
+installing: setuptools-39.2.0-py36_0 ...
+installing: cryptography-2.2.2-py36h14c3975_0 ...
+installing: wheel-0.31.1-py36_0 ...
+installing: pip-10.0.1-py36_0 ...
+installing: pyopenssl-18.0.0-py36_0 ...
+installing: urllib3-1.22-py36hbe7ace6_0 ...
+installing: requests-2.18.4-py36he2e5f8d_1 ...
+installing: conda-4.5.4-py36_0 ...
+unlinking: asn1crypto-1.3.0-py37_0
+unlinking: ca-certificates-2020.1.1-0
+unlinking: certifi-2020.6.20-py37_0
+unlinking: chardet-3.0.4-py37_1003
+unlinking: idna-2.9-py_1
+unlinking: libedit-3.1.20181209-hc058e9b_0
+unlinking: libgcc-ng-9.1.0-hdf63c60_0
+unlinking: openssl-1.0.2u-h7b6447c_0
+unlinking: pycosat-0.6.3-py37h7b6447c_0
+unlinking: python-3.7.0-hc3d631a_0
+unlinking: readline-7.0-h7b6447c_5
+unlinking: sqlite-3.31.1-h7b6447c_0
+unlinking: tk-8.6.10-hbc83047_0
+unlinking: xz-5.2.5-h7b6447c_0
+unlinking: yaml-0.2.5-h7b6447c_0
+unlinking: zlib-1.2.11-h7b6447c_3
+installation finished.
+WARNING:
+    You currently have a PYTHONPATH environment variable set. This may cause
+    unexpected behavior when running the Python interpreter in Miniconda3.
+    For best results, please verify that your PYTHONPATH only points to
+    directories of packages that are compatible with the Python interpreter
+    in Miniconda3: /usr/local
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /usr/local
+
+  added / updated specs: 
+    - conda
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    openssl-1.1.1g             |       h7b6447c_0         3.8 MB
+    libstdcxx-ng-9.1.0         |       hdf63c60_0         4.0 MB
+    conda-4.8.3                |           py36_0         3.0 MB
+    python-3.6.8               |       h0371630_0        34.4 MB
+    sqlite-3.26.0              |       h7b6447c_0         1.9 MB
+    cryptography-2.9.2         |   py36h1ba5d50_0         626 KB
+    certifi-2020.6.20          |           py36_0         160 KB
+    conda-package-handling-1.6.1|   py36h7b6447c_0         886 KB
+    ------------------------------------------------------------
+                                           Total:        48.8 MB
+
+The following NEW packages will be INSTALLED:
+
+    conda-package-handling: 1.6.1-py36h7b6447c_0
+    tqdm:                   4.46.1-py_0         
+
+The following packages will be UPDATED:
+
+    ca-certificates:        2018.03.07-0         --&gt; 2020.1.1-0          
+    certifi:                2018.4.16-py36_0     --&gt; 2020.6.20-py36_0    
+    conda:                  4.5.4-py36_0         --&gt; 4.8.3-py36_0        
+    cryptography:           2.2.2-py36h14c3975_0 --&gt; 2.9.2-py36h1ba5d50_0
+    libgcc-ng:              7.2.0-hdf63c60_3     --&gt; 9.1.0-hdf63c60_0    
+    libstdcxx-ng:           7.2.0-hdf63c60_3     --&gt; 9.1.0-hdf63c60_0    
+    openssl:                1.0.2o-h20670df_0    --&gt; 1.1.1g-h7b6447c_0   
+    python:                 3.6.5-hc3d631a_2     --&gt; 3.6.8-h0371630_0    
+    sqlite:                 3.23.1-he433501_0    --&gt; 3.26.0-h7b6447c_0   
+    tk:                     8.6.7-hc745277_3     --&gt; 8.6.10-hbc83047_0   
+
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+no change     /usr/local/condabin/conda
+no change     /usr/local/bin/conda
+no change     /usr/local/bin/conda-env
+no change     /usr/local/bin/activate
+no change     /usr/local/bin/deactivate
+no change     /usr/local/etc/profile.d/conda.sh
+no change     /usr/local/etc/fish/conf.d/conda.fish
+no change     /usr/local/shell/condabin/Conda.psm1
+no change     /usr/local/shell/condabin/conda-hook.ps1
+no change     /usr/local/lib/python3.6/site-packages/xontrib/conda.xsh
+no change     /usr/local/etc/profile.d/conda.csh
+modified      /root/.bashrc
+
+==&gt; For changes to take effect, close and re-open your current shell. &lt;==
+
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... failed with initial frozen solve. Retrying with flexible solve.
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... failed with initial frozen solve. Retrying with flexible solve.
+
+PackagesNotFoundError: The following packages are not available from current channels:
+
+  - _license
+
+Current channels:
+
+  - https://repo.anaconda.com/pkgs/main/linux-64
+  - https://repo.anaconda.com/pkgs/main/noarch
+  - https://repo.anaconda.com/pkgs/r/linux-64
+  - https://repo.anaconda.com/pkgs/r/noarch
+
+To search for alternate channels that may provide the conda package you&#39;re
+looking for, navigate to
+
+    https://anaconda.org
+
+and use the search bar at the top of the page.
+
+
+not found test36 env 0
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /usr/local/envs/test36
+
+  added / updated specs:
+    - python=3.6
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    _libgcc_mutex-0.1          |             main           3 KB
+    ca-certificates-2020.1.1   |                0         125 KB
+    certifi-2020.6.20          |           py36_0         156 KB
+    ld_impl_linux-64-2.33.1    |       h53a641e_7         568 KB
+    libedit-3.1.20191231       |       h7b6447c_0         167 KB
+    libffi-3.3                 |       he6710b0_1          50 KB
+    libgcc-ng-9.1.0            |       hdf63c60_0         5.1 MB
+    libstdcxx-ng-9.1.0         |       hdf63c60_0         3.1 MB
+    ncurses-6.2                |       he6710b0_1         817 KB
+    openssl-1.1.1g             |       h7b6447c_0         2.5 MB
+    pip-20.1.1                 |           py36_1         1.8 MB
+    python-3.6.10              |       h7579374_2        29.7 MB
+    readline-8.0               |       h7b6447c_0         356 KB
+    setuptools-47.3.1          |           py36_0         514 KB
+    sqlite-3.32.3              |       h62c20be_0         1.1 MB
+    tk-8.6.10                  |       hbc83047_0         3.0 MB
+    wheel-0.34.2               |           py36_0          51 KB
+    xz-5.2.5                   |       h7b6447c_0         341 KB
+    zlib-1.2.11                |       h7b6447c_3         103 KB
+    ------------------------------------------------------------
+                                           Total:        49.4 MB
+
+The following NEW packages will be INSTALLED:
+
+  _libgcc_mutex      pkgs/main/linux-64::_libgcc_mutex-0.1-main
+  ca-certificates    pkgs/main/linux-64::ca-certificates-2020.1.1-0
+  certifi            pkgs/main/linux-64::certifi-2020.6.20-py36_0
+  ld_impl_linux-64   pkgs/main/linux-64::ld_impl_linux-64-2.33.1-h53a641e_7
+  libedit            pkgs/main/linux-64::libedit-3.1.20191231-h7b6447c_0
+  libffi             pkgs/main/linux-64::libffi-3.3-he6710b0_1
+  libgcc-ng          pkgs/main/linux-64::libgcc-ng-9.1.0-hdf63c60_0
+  libstdcxx-ng       pkgs/main/linux-64::libstdcxx-ng-9.1.0-hdf63c60_0
+  ncurses            pkgs/main/linux-64::ncurses-6.2-he6710b0_1
+  openssl            pkgs/main/linux-64::openssl-1.1.1g-h7b6447c_0
+  pip                pkgs/main/linux-64::pip-20.1.1-py36_1
+  python             pkgs/main/linux-64::python-3.6.10-h7579374_2
+  readline           pkgs/main/linux-64::readline-8.0-h7b6447c_0
+  setuptools         pkgs/main/linux-64::setuptools-47.3.1-py36_0
+  sqlite             pkgs/main/linux-64::sqlite-3.32.3-h62c20be_0
+  tk                 pkgs/main/linux-64::tk-8.6.10-hbc83047_0
+  wheel              pkgs/main/linux-64::wheel-0.34.2-py36_0
+  xz                 pkgs/main/linux-64::xz-5.2.5-h7b6447c_0
+  zlib               pkgs/main/linux-64::zlib-1.2.11-h7b6447c_3
+
+
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><pre>
+You should see a lot of install activity above, similar to this:</p>
+<p>installing miniconda
+--2020-06-27 22:45:59--  <a href="https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh">https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh</a>
+Resolving repo.continuum.io (repo.continuum.io)... 104.18.201.79, 104.18.200.79, 2606:4700::6812:c94f, ...
+Connecting to repo.continuum.io (repo.continuum.io)|104.18.201.79|:443... connected.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: <a href="https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh">https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh</a> [following]
+--2020-06-27 22:45:59--  <a href="https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh">https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh</a>
+Resolving repo.anaconda.com (repo.anaconda.com)... 104.16.131.3, 104.16.130.3, 2606:4700::6810:8203, ...
+Connecting to repo.anaconda.com (repo.anaconda.com)|104.16.131.3|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 58468498 (56M) [application/x-sh]
+Saving to: ‘Miniconda3-4.5.4-Linux-x86_64.sh.1’</p>
+<p>Miniconda3-4.5.4-Li 100%[===================&gt;]  55.76M   180MB/s    in 0.3s</p>
+<p>2020-06-27 22:45:59 (180 MB/s) - ‘Miniconda3-4.5.4-Linux-x86_64.sh.1’ saved [58468498/58468498]</p>
+<p>PREFIX=/usr/local
+installing: python-3.6.5-hc3d631a_2 ...
+Python 3.6.5 :: Anaconda, Inc.
+installing: ca-certificates-2018.03.07-0 ...
+...
+unlinking: zlib-1.2.11-h7b6447c_3
+installation finished.
+WARNING:
+    You currently have a PYTHONPATH environment variable set. This may cause
+    unexpected behavior when running the Python interpreter in Miniconda3.
+    For best results, please verify that your PYTHONPATH only points to
+    directories of packages that are compatible with the Python interpreter
+    in Miniconda3: /usr/local
+Solving environment: ...working... done</p>
+<h2 id="Package-Plan">Package Plan<a class="anchor-link" href="#Package-Plan">&#182;</a></h2><p>environment location: /usr/local</p>
+<p>added / updated specs:</p>
+
+<pre><code>- conda
+
+
+</code></pre>
+<p>The following packages will be downloaded:</p>
+
+<pre><code>package                    |            build
+---------------------------|-----------------
+openssl-1.1.1g             |       h7b6447c_0         3.8 MB
+</code></pre>
+<p>...</p>
+
+<pre><code>conda-package-handling-1.6.1|   py36h7b6447c_0         886 KB
+------------------------------------------------------------
+                                       Total:        48.8 MB
+
+</code></pre>
+<p>The following NEW packages will be INSTALLED:</p>
+
+<pre><code>conda-package-handling: 1.6.1-py36h7b6447c_0
+tqdm:                   4.46.1-py_0         
+
+</code></pre>
+<p>The following packages will be UPDATED:</p>
+
+<pre><code>ca-certificates:        2018.03.07-0         --&gt; 2020.1.1-0          
+</code></pre>
+<p>... 
+    tk:                     8.6.7-hc745277_3     --&gt; 8.6.10-hbc83047_0</p>
+<p>Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+no change     /usr/local/condabin/conda
+...
+no change     /usr/local/etc/profile.d/conda.csh
+modified      /root/.bashrc</p>
+<p>==&gt; For changes to take effect, close and re-open your current shell. &lt;==</p>
+<p>Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... failed with initial frozen solve. Retrying with flexible solve.
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... failed with initial frozen solve. Retrying with flexible solve.</p>
+<p>PackagesNotFoundError: The following packages are not available from current channels:</p>
+<ul>
+<li>_license</li>
+</ul>
+<p>Current channels:</p>
+<ul>
+<li><a href="https://repo.anaconda.com/pkgs/main/linux-64">https://repo.anaconda.com/pkgs/main/linux-64</a></li>
+<li><a href="https://repo.anaconda.com/pkgs/main/noarch">https://repo.anaconda.com/pkgs/main/noarch</a></li>
+<li><a href="https://repo.anaconda.com/pkgs/r/linux-64">https://repo.anaconda.com/pkgs/r/linux-64</a></li>
+<li><a href="https://repo.anaconda.com/pkgs/r/noarch">https://repo.anaconda.com/pkgs/r/noarch</a></li>
+</ul>
+<p>To search for alternate channels that may provide the conda package you're
+looking for, navigate to</p>
+
+<pre><code>https://anaconda.org
+
+</code></pre>
+<p>and use the search bar at the top of the page.</p>
+<p>not found test36 env 0
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done</p>
+<h2 id="Package-Plan">Package Plan<a class="anchor-link" href="#Package-Plan">&#182;</a></h2><p>environment location: /usr/local/envs/test36</p>
+<p>added / updated specs:</p>
+
+<pre><code>- python=3.6
+
+
+</code></pre>
+<p>The following packages will be downloaded:</p>
+
+<pre><code>package                    |            build
+---------------------------|-----------------
+_libgcc_mutex-0.1          |             main           3 KB
+</code></pre>
+<p>...</p>
+
+<pre><code>zlib-1.2.11                |       h7b6447c_3         103 KB
+------------------------------------------------------------
+                                       Total:        49.4 MB
+
+</code></pre>
+<p>The following NEW packages will be INSTALLED:</p>
+<p>_libgcc_mutex      pkgs/main/linux-64::_libgcc_mutex-0.1-main
+...
+  zlib               pkgs/main/linux-64::zlib-1.2.11-h7b6447c_3</p>
+<p>Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>check if conda exists again, now you should see something like "/usr/loca/bin/conda"</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>which conda
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>/usr/local/bin/conda
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Check on your environment</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>env
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>CUDNN_VERSION=7.6.5.32
+LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+CLOUDSDK_PYTHON=python3
+_=/usr/bin/env
+LANG=en_US.UTF-8
+HOSTNAME=30d0f4010561
+OLDPWD=/
+CLOUDSDK_CONFIG=/content/.config
+NVIDIA_VISIBLE_DEVICES=all
+DATALAB_SETTINGS_OVERRIDES={&#34;kernelManagerProxyPort&#34;:6000,&#34;kernelManagerProxyHost&#34;:&#34;172.28.0.3&#34;,&#34;jupyterArgs&#34;:[&#34;--ip=\&#34;172.28.0.2\&#34;&#34;]}
+ENV=/root/.bashrc
+PAGER=cat
+NCCL_VERSION=2.4.8
+TF_FORCE_GPU_ALLOW_GROWTH=true
+JPY_PARENT_PID=18
+NO_GCE_CHECK=True
+PWD=/content
+HOME=/root
+LAST_FORCED_REBUILD=20200609
+CLICOLOR=1
+DEBIAN_FRONTEND=noninteractive
+LIBRARY_PATH=/usr/local/cuda/lib64/stubs
+GCE_METADATA_TIMEOUT=0
+GLIBCPP_FORCE_NEW=1
+TBE_CREDS_ADDR=172.28.0.1:8008
+TERM=xterm-color
+SHELL=/bin/bash
+GCS_READ_CACHE_BLOCK_SIZE_MB=16
+PYTHONWARNINGS=ignore:::pip._internal.cli.base_command
+MPLBACKEND=module://ipykernel.pylab.backend_inline
+CUDA_PKG_VERSION=10-1=10.1.243-1
+CUDA_VERSION=10.1.243
+NVIDIA_DRIVER_CAPABILITIES=compute,utility
+SHLVL=2
+PYTHONPATH=/env/python
+NVIDIA_REQUIRE_CUDA=cuda&gt;=10.1 brand=tesla,driver&gt;=384,driver&lt;385 brand=tesla,driver&gt;=396,driver&lt;397 brand=tesla,driver&gt;=410,driver&lt;411
+COLAB_GPU=0
+GLIBCXX_FORCE_NEW=1
+PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/tools/node/bin:/tools/google-cloud-sdk/bin:/opt/bin
+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4
+GIT_PAGER=cat
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now you can run python in your conda environment. However, this will only persist for one cell. Then next cell will revert back to your base Google Colab environment. This is because you are using %%bash, this command will open a shell and run the commands within the same cell, but will close down when you exit the cell.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span>%%bash
+<span class="nb">source</span> activate test36
+
+python
+import sys
+<span class="c1"># maybe only need this the first time we run this notebook</span>
+sys.path.append<span class="o">(</span><span class="s1">&#39;/usr/local/lib/python3.6/site-packages&#39;</span><span class="o">)</span>
+
+print<span class="o">(</span><span class="s2">&quot;Python version&quot;</span><span class="o">)</span>
+print<span class="o">(</span>sys.version<span class="o">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Python version
+3.6.10 |Anaconda, Inc.| (default, May  8 2020, 02:54:21) 
+[GCC 7.3.0]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The next cell will revert back to the default shell that was opened when you started Google Colab</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>3.6.9 (default, Apr 18 2020, 01:56:04) 
+[GCC 8.4.0]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Not sure how to get around this, and run multiple cells from within your own environment only invoking python once...</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Also note that conda activate does not work. Only source activate works like this so far. Still looking at this option, but the hints in this error do not help.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span>%%bash
+conda activate test36
+
+python
+import sys
+<span class="c1"># maybe only need this the first time we run this notebook</span>
+sys.path.append<span class="o">(</span><span class="s1">&#39;/usr/local/lib/python3.6/site-packages&#39;</span><span class="o">)</span>
+
+print<span class="o">(</span><span class="s2">&quot;Python version&quot;</span><span class="o">)</span>
+print<span class="o">(</span>sys.version<span class="o">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Python version
+3.6.8 |Anaconda, Inc.| (default, Dec 30 2018, 01:22:34) 
+[GCC 7.3.0]
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+CommandNotFoundError: Your shell has not been properly configured to use &#39;conda activate&#39;.
+To initialize your shell, run
+
+    $ conda init &lt;SHELL_NAME&gt;
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See &#39;conda init --help&#39; for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running &#39;conda init&#39;.
+
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Additional info about the conda you just installed</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>conda info
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+     active environment : None
+       user config file : /root/.condarc
+ populated config files : 
+          conda version : 4.8.3
+    conda-build version : not installed
+         python version : 3.6.8.final.0
+       virtual packages : __glibc=2.27
+       base environment : /usr/local  (writable)
+           channel URLs : https://repo.anaconda.com/pkgs/main/linux-64
+                          https://repo.anaconda.com/pkgs/main/noarch
+                          https://repo.anaconda.com/pkgs/r/linux-64
+                          https://repo.anaconda.com/pkgs/r/noarch
+          package cache : /usr/local/pkgs
+                          /root/.conda/pkgs
+       envs directories : /usr/local/envs
+                          /root/.conda/envs
+               platform : linux-64
+             user-agent : conda/4.8.3 requests/2.18.4 CPython/3.6.8 Linux/4.19.104+ ubuntu/18.04.3 glibc/2.27
+                UID:GID : 0:0
+             netrc file : None
+           offline mode : False
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Location of your environment inside this container</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>ls -rlt  /usr/local/envs
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>total 4
+drwxr-xr-x 10 root root 4096 Jun 27 22:47 test36
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    </div>
+  </div>
+</body>
+
+ 
+
+
+</html>
